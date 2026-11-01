@@ -1,26 +1,28 @@
-=== NOT YET COMPLIANT -- DO NOT SEND ===
-! No physical mailing address is configured -- this draft is NOT CAN-SPAM compliant yet. Add one to "brand_mailing_address" in config.json before sending anything.
-=========================================
+=== REVIEW REQUIRED ===
+! Historical sample output for portfolio inspection.
+! Contact details have been removed from this public portfolio copy.
+! Unsubscribe language and address placeholders do not establish legal compliance.
+=======================
 
-Subject: Website compliance findings for [REDACTED] (B, 86/100)
+Subject: Website review findings for [REDACTED] (B, 86/100)
 
 Hi there,
 
-I ran an independent automated compliance scan on [REDACTED], covering accessibility (ADA/WCAG), search visibility (SEO), and basic security hygiene. It came back with a health score of 86/100 (B). A few things stood out:
+I ran an automated website review on [REDACTED], covering accessibility-related checks, search visibility (SEO), and basic security hygiene. It returned a score of 86/100 (B). A few findings stood out:
 
   - Page has no top-level heading (H1)
   - Page title length is not ideal (4 characters)
   - Embedded frame (iframe) missing a title
 
-The full report is attached, with plain-language explanations and recommended fixes for each item. No obligation -- happy to help prioritize or fix any of it if useful, or just take the report and run with it yourselves.
+The full report is attached, with explanations and suggested improvements. No obligation -- happy to help prioritize or address any of the findings if useful.
 
 StellaAudits
-[REDACTED EMAIL] | [REDACTED PHONE]
+[CONTACT DETAILS REMOVED]
 
 ---
-This is a promotional message from StellaAudits, sent because [REDACTED] was included in an independent website compliance review.
+This is a promotional-message draft for human review. Before sending, verify the recipient, sender identity, required disclosures, physical mailing address, and opt-out handling. This sample does not establish legal compliance.
 
 StellaAudits
-[REDACTED: physical mailing address required by the CAN-SPAM Act before sending]
+[MAILING ADDRESS REMOVED]
 
-Don't want to hear from us again? Just reply to this email with "unsubscribe" and you won't be contacted again.
+Don't want to hear from us again? Reply to this email with "unsubscribe" to opt out.
