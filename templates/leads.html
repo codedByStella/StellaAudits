@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>StellaAudits — Audit History</title>
+    <style>
+        :root { --navy: #1a1a2e; --accent: #4a5cf5; }
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+            background: #f4f4f8; margin: 0; padding: 0; color: #222;
+        }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 30px 20px 60px; }
+        .navbar { background: var(--navy); padding: 16px 0; }
+        .navbar-inner {
+            max-width: 1100px; margin: 0 auto; padding: 0 20px;
+            display: flex; align-items: center; gap: 24px;
+        }
+        .navbar a { color: #cfd2e8; text-decoration: none; font-size: 14px; font-weight: 600; }
+        .navbar a.active, .navbar a:hover { color: #fff; }
+        .navbar .logo { color: #fff; font-weight: 700; font-size: 16px; margin-right: auto; }
+
+        h1 { color: var(--navy); font-size: 24px; margin-bottom: 4px; }
+        .subtitle { color: #666; margin-top: 0; margin-bottom: 24px; }
+
+        .counts-row { display: flex; gap: 10px; margin-bottom: 24px; flex-wrap: wrap; }
+        .count-chip {
+            background: #fff; border-radius: 8px; padding: 10px 16px; font-size: 13px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08); text-decoration: none; color: #333;
+        }
+        .count-chip b { display: block; font-size: 18px; color: var(--navy); }
+        .count-chip.active { border: 2px solid var(--accent); }
+
+        table {
+            width: 100%; border-collapse: collapse; background: #fff;
+            border-radius: 8px; overflow: hidden;
+            box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+        }
+        th, td { padding: 10px 12px; text-align: left; font-size: 13px; border-bottom: 1px solid #eee; }
+        th { background: #f0f0f5; color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+        tr:last-child td { border-bottom: none; }
+        .grade-badge { font-weight: 700; padding: 2px 8px; border-radius: 4px; background: #eee; }
+        a.file-link { color: var(--accent); text-decoration: none; font-weight: 600; margin-right: 10px; }
+        a.file-link:hover { text-decoration: underline; }
+        select.status-select {
+            padding: 5px 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 12px;
+        }
+        .empty-state { text-align: center; padding: 60px 20px; color: #888; }
+        .error-cell { color: #b00020; font-size: 12px; }
+
+        @media (max-width: 700px) {
+            .wrap { padding: 20px 12px 40px; }
+            .navbar-inner { gap: 14px; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-inner">
+        <span class="logo">StellaAudits</span>
+        <a href="/">Single / Batch Audit</a>
+        <a href="/leads" class="active">Audit History</a>
+    </div>
+</div>
+
+<div class="wrap">
+    <h1>Audit History</h1>
+    <p class="subtitle">A chronological record of completed and attempted audits.</p>
+
+    <div class="counts-row">
+        <a href="/leads" class="count-chip {{ 'active' if not active_filter else '' }}">
+            <b>{{ total_count }}</b>All
+        </a>
+        {% for status in statuses %}
+        <a href="/leads?status={{ status }}" class="count-chip {{ 'active' if active_filter == status else '' }}">
+            <b>{{ counts.get(status, 0) }}</b>{{ status }}
+        </a>
+        {% endfor %}
+    </div>
+
+    {% if records %}
+    <table>
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Domain</th>
+                <th>Grade</th>
+                <th>Findings</th>
+                <th>Status</th>
+                <th>Files</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for r in records %}
+        <tr data-id="{{ r.id }}">
+            <td>{{ r.audited_at[:10] }}</td>
+            <td>{{ r.domain }}</td>
+            <td>
+                {% if r.grade %}
+                <span class="grade-badge">{{ r.grade }} ({{ r.score }})</span>
+                {% else %}
+                —
+                {% endif %}
+            </td>
+            <td>{{ r.total_findings if r.total_findings is not none else '—' }}</td>
+            <td>
+                <select class="status-select" onchange="updateStatus({{ r.id }}, this.value)">
+                    {% for status in statuses %}
+                    <option value="{{ status }}" {{ 'selected' if r.status == status else '' }}>{{ status }}</option>
+                    {% endfor %}
+                </select>
+            </td>
+            <td>
+                {% if r.pdf_filename %}
+                <a class="file-link" href="/reports/{{ r.pdf_filename }}" target="_blank" rel="noopener noreferrer">PDF</a>
+                {% endif %}
+                {% if r.email_draft_filename %}
+                <a class="file-link" href="/reports/{{ r.email_draft_filename }}" target="_blank" rel="noopener noreferrer">Email draft</a>
+                {% endif %}
+                {% if r.error %}
+                <div class="error-cell">Audit failed</div>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        No audit records available yet.
+        Run an audit from the <a href="/">Single / Batch Audit</a> page.
+    </div>
+    {% endif %}
+</div>
+
+<script>
+async function updateStatus(id, status) {
+    try {
+        const response = await fetch(`/leads/${id}/status`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status })
+        });
+
+        if (!response.ok) {
+            throw new Error('Server rejected the status update.');
+        }
+    } catch (e) {
+        alert('Failed to update status: ' + e.message);
+    }
+}
+</script>
+</body>
+</html>
