@@ -1,0 +1,26 @@
+=== NOT YET COMPLIANT -- DO NOT SEND ===
+! No physical mailing address is configured -- this draft is NOT CAN-SPAM compliant yet. Add one to "brand_mailing_address" in config.json before sending anything.
+=========================================
+
+Subject: Website compliance findings for [REDACTED] (F, 33/100)
+
+Hi there,
+
+I ran an independent automated compliance scan on [REDACTED], covering accessibility (ADA/WCAG), search visibility (SEO), and basic security hygiene. It came back with a health score of 33/100 (F). A few things stood out:
+
+  - Page has no top-level heading (H1)
+  - Missing meta description
+  - Missing clickjacking protection (X-Frame-Options)
+
+The full report is attached, with plain-language explanations and recommended fixes for each item. No obligation -- happy to help prioritize or fix any of it if useful, or just take the report and run with it yourselves.
+
+StellaAudits
+[REDACTED EMAIL] | [REDACTED PHONE]
+
+---
+This is a promotional message from StellaAudits, sent because [REDACTED] was included in an independent website compliance review.
+
+StellaAudits
+[REDACTED: physical mailing address required by the CAN-SPAM Act before sending]
+
+Don't want to hear from us again? Just reply to this email with "unsubscribe" and you won't be contacted again.
