@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StellaAudits — Site Audit Tool</title>
+<style>
+    :root { --navy: #1a1a2e; --accent: #4a5cf5; }
+    * { box-sizing: border-box; }
+    body {
+        font-family: -apple-system, Segoe UI, Helvetica, Arial, sans-serif;
+        background: #f4f4f8; margin: 0; padding: 0; color: #222;
+    }
+    .navbar { background: var(--navy); padding: 16px 0; }
+    .navbar-inner {
+        max-width: 900px; margin: 0 auto; padding: 0 20px;
+        display: flex; align-items: center; gap: 24px;
+    }
+    .navbar a {
+        color: #cfd2e8; text-decoration: none;
+        font-size: 14px; font-weight: 600;
+    }
+    .navbar a.active, .navbar a:hover { color: #fff; }
+    .navbar .logo {
+        color: #fff; font-weight: 700;
+        font-size: 16px; margin-right: auto;
+    }
+    .wrap {
+        max-width: 720px; margin: 40px auto 60px;
+        padding: 0 20px;
+    }
+    .card {
+        background: #fff; border-radius: 10px; padding: 36px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    h1 { margin-top: 0; color: var(--navy); font-size: 26px; }
+    p.tagline { color: #666; margin-top: -8px; margin-bottom: 24px; }
+    .tabs {
+        display: flex; gap: 4px; margin-bottom: 24px;
+        border-bottom: 2px solid #eee;
+    }
+    .tab-btn {
+        background: none; border: none; padding: 10px 18px;
+        font-size: 14px; font-weight: 600; color: #888;
+        cursor: pointer; border-bottom: 3px solid transparent;
+        margin-bottom: -2px; width: auto;
+    }
+    .tab-btn.active {
+        color: var(--accent); border-bottom-color: var(--accent);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    label {
+        font-weight: 600; font-size: 14px;
+        display: block; margin-bottom: 6px;
+    }
+    input[type=text] {
+        width: 100%; padding: 12px 14px; font-size: 16px;
+        border: 1px solid #ccc; border-radius: 6px;
+        margin-bottom: 18px;
+    }
+    textarea {
+        width: 100%; min-height: 120px; padding: 12px 14px;
+        font-size: 14px; border: 1px solid #ccc;
+        border-radius: 6px; margin-bottom: 8px;
+        font-family: inherit; resize: vertical;
+    }
+    .hint { font-size: 12px; color: #888; margin-bottom: 18px; }
+    .checkbox-row {
+        display: flex; align-items: flex-start; gap: 8px;
+        margin-bottom: 24px; font-size: 13px; color: #555;
+    }
+    button {
+        background: var(--accent); color: #fff; border: none;
+        padding: 14px 28px; font-size: 16px; font-weight: 600;
+        border-radius: 6px; cursor: pointer; width: 100%;
+    }
+    button:hover { background: #3a4ad5; }
+    button:disabled { background: #999; cursor: not-allowed; }
+    .status { margin-top: 20px; font-size: 14px; }
+    .error {
+        color: #b00020; background: #fdeaea;
+        padding: 12px 14px; border-radius: 6px; margin-top: 16px;
+    }
+    .success {
+        color: #1a5d1a; background: #eafdea;
+        padding: 12px 14px; border-radius: 6px; margin-top: 16px;
+    }
+    .success a { color: #1a5d1a; font-weight: 700; }
+    .warn-box {
+        color: #7a5a00; background: #fff6e0;
+        padding: 10px 14px; border-radius: 6px;
+        margin-top: 10px; font-size: 12.5px;
+    }
+    .spinner {
+        display: inline-block; width: 14px; height: 14px;
+        border: 2px solid #fff; border-top-color: transparent;
+        border-radius: 50%; animation: spin 0.7s linear infinite;
+        margin-right: 8px; vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .footnote {
+        font-size: 12px; color: #888;
+        margin-top: 24px; line-height: 1.5;
+    }
+    .progress-bar-outer {
+        background: #eee; border-radius: 6px; height: 10px;
+        overflow: hidden; margin: 14px 0;
+    }
+    .progress-bar-inner {
+        background: var(--accent); height: 100%;
+        width: 0%; transition: width 0.3s;
+    }
+    .batch-result-row {
+        padding: 8px 10px; border-bottom: 1px solid #eee;
+        font-size: 13px; display: flex;
+        justify-content: space-between; gap: 10px;
+    }
+    .batch-result-row .domain { font-weight: 600; overflow-wrap: anywhere; }
+    .batch-result-row a {
+        color: var(--accent); text-decoration: none; margin-left: 8px;
+    }
+    .batch-result-row .fail { color: #b00020; }
+</style>
+</head>
+<body>
+
+<div class="navbar">
+    <div class="navbar-inner">
+        <span class="logo">StellaAudits</span>
+        <a href="/" class="active">Single / Batch Audit</a>
+        <a href="/leads">Leads</a>
+    </div>
+</div>
+
+<div class="wrap">
+    <div class="card">
+        <h1>StellaAudits</h1>
+        <p class="tagline">Website compliance &amp; risk audit generator</p>
+
+        <div class="tabs">
+            <button type="button" class="tab-btn active" data-tab="single">
+                Single URL
+            </button>
+            <button type="button" class="tab-btn" data-tab="batch">
+                Batch
+            </button>
+        </div>
+
+        <div class="tab-panel active" id="tab-single">
+            <form id="audit-form">
+                <label for="url">Website URL</label>
+                <input
+                    type="text"
+                    id="url"
+                    name="url"
+                    placeholder="e.g. example.com"
+                    required
+                >
+
+                <div class="checkbox-row">
+                    <input type="checkbox" id="deeper" checked style="margin-top:2px;">
+                    <label for="deeper" style="font-weight:400; margin-bottom:0;">
+                        Include optional enhanced analysis
+                        {% if not has_pagespeed_key %}
+                            — <b>no API key configured</b>; this feature will be skipped
+                            until one is added in config.json.
+                        {% endif %}
+                    </label>
+                </div>
+
+                <button type="submit" id="start-btn">Start Audit</button>
+            </form>
+            <div id="status" class="status"></div>
+        </div>
+
+        <div class="tab-panel" id="tab-batch">
+            <form id="batch-form">
+                <label for="urls">Website URLs (one per line)</label>
+                <textarea
+                    id="urls"
+                    placeholder="example1.com&#10;example2.com&#10;example3.com"
+                ></textarea>
+
+                <div class="hint">
+                    Up to 100 at a time. Sites are processed sequentially
+                    with a pause between requests.
+                </div>
+
+                <div class="checkbox-row">
+                    <input type="checkbox" id="batch-deeper" checked style="margin-top:2px;">
+                    <label for="batch-deeper" style="font-weight:400; margin-bottom:0;">
+                        Include optional enhanced analysis on each site
+                        {% if not has_pagespeed_key %}
+                            — no API key configured.
+                        {% endif %}
+                    </label>
+                </div>
+
+                <button type="submit" id="batch-start-btn">
+                    Start Batch Audit
+                </button>
+            </form>
+
+            <div id="batch-progress" style="display:none;">
+                <div class="progress-bar-outer">
+                    <div class="progress-bar-inner" id="progress-bar-inner"></div>
+                </div>
+                <div id="progress-label" style="font-size:13px; color:#666;"></div>
+                <div id="batch-results" style="margin-top:14px;"></div>
+            </div>
+        </div>
+
+        <div class="footnote">
+            Audits analyze publicly reachable website content and
+            standard discovery resources. Only submit URLs you are
+            authorized to assess, and respect applicable website terms
+            and access restrictions. Audit results and draft correspondence
+            are available through the Leads page. This tool is not a
+            substitute for a certified accessibility audit or legal advice.
+        </div>
+    </div>
+</div>
+
+<script>
+// --- Safe DOM helpers ---
+
+function createElement(tag, className, text) {
+    const element = document.createElement(tag);
+
+    if (className) element.className = className;
+    if (text !== undefined && text !== null) {
+        element.textContent = String(text);
+    }
+
+    return element;
+}
+
+function appendText(parent, text) {
+    parent.appendChild(document.createTextNode(String(text ?? '')));
+}
+
+function addLocalLink(parent, url, label) {
+    if (
+        typeof url !== 'string' ||
+        !url.startsWith('/') ||
+        url.startsWith('//')
+    ) {
+        return;
+    }
+
+    const link = createElement('a', '', label);
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    parent.appendChild(link);
+}
+
+function showError(container, message) {
+    const error = createElement(
+        'div',
+        'error',
+        message || 'Something went wrong.'
+    );
+
+    container.replaceChildren(error);
+}
+
+// --- Tab switching ---
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(item =>
+            item.classList.remove('active')
+        );
+
+        document.querySelectorAll('.tab-panel').forEach(panel =>
+            panel.classList.remove('active')
+        );
+
+        btn.classList.add('active');
+
+        document.getElementById(
+            'tab-' + btn.dataset.tab
+        ).classList.add('active');
+    });
+});
+
+// --- Single URL audit ---
+
+const form = document.getElementById('audit-form');
+const statusDiv = document.getElementById('status');
+const btn = document.getElementById('start-btn');
+
+function renderSingleResult(data) {
+    if (!data.ok) {
+        showError(statusDiv, data.error);
+        return;
+    }
+
+    const result = createElement('div', 'success');
+
+    const summary = createElement('div');
+    appendText(summary, 'Audit complete — ');
+
+    const grade = createElement(
+        'b',
+        '',
+        `${data.grade} (${data.score}/100)`
+    );
+
+    summary.appendChild(grade);
+
+    appendText(
+        summary,
+        `, ${data.total_findings} findings ` +
+        `(${data.counts.High} high, ` +
+        `${data.counts.Medium} medium, ` +
+        `${data.counts.Low} low, ` +
+        `${data.counts.Info} info).`
+    );
+
+    result.appendChild(summary);
+
+    if (data.comparison) {
+        const comparison = data.comparison;
+        const sign = comparison.score_delta > 0 ? '+' : '';
+
+        const comparisonText = createElement('div');
+
+        appendText(
+            comparisonText,
+            `Previous scan (${comparison.previous_date}): ` +
+            `${comparison.previous_grade} ` +
+            `(${comparison.previous_score}/100) → now ` +
+            `${sign}${comparison.score_delta} — ` +
+            `${comparison.resolved.length} resolved, ` +
+            `${comparison.new.length} new since last time.`
+        );
+
+        result.appendChild(comparisonText);
+    }
+
+    const links = createElement('div');
+
+    addLocalLink(links, data.download_url, 'Download PDF report');
+    appendText(links, ' | ');
+    addLocalLink(links, data.email_draft_url, 'View email draft');
+
+    result.appendChild(links);
+    statusDiv.replaceChildren(result);
+
+    if (Array.isArray(data.email_warnings) && data.email_warnings.length) {
+        const warning = createElement('div', 'warn-box');
+
+        data.email_warnings.forEach((message, index) => {
+            if (index) warning.appendChild(document.createElement('br'));
+            appendText(warning, message);
+        });
+
+        statusDiv.appendChild(warning);
+    }
+}
+
+form.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const url = document.getElementById('url').value.trim();
+    const deeper = document.getElementById('deeper').checked;
+
+    if (!url) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Running audit...';
+    statusDiv.replaceChildren();
+
+    try {
+        const response = await fetch('/audit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url, deeper })
+        });
+
+        const data = await response.json();
+        renderSingleResult(data);
+
+    } catch (error) {
+        showError(statusDiv, 'The audit request failed.');
+
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Start Audit';
+    }
+});
+
+// --- Batch audit ---
+
+const batchForm = document.getElementById('batch-form');
+const batchBtn = document.getElementById('batch-start-btn');
+const batchProgress = document.getElementById('batch-progress');
+const progressBarInner = document.getElementById('progress-bar-inner');
+const progressLabel = document.getElementById('progress-label');
+const batchResults = document.getElementById('batch-results');
+
+function renderBatchRow(result) {
+    const row = createElement('div', 'batch-result-row');
+    const domain = createElement('span', 'domain', result.url);
+
+    row.appendChild(domain);
+
+    if (!result.ok) {
+        domain.classList.add('fail');
+
+        row.appendChild(
+            createElement('span', 'fail', result.error)
+        );
+
+        return row;
+    }
+
+    const details = createElement('span');
+
+    appendText(
+        details,
+        `${result.grade} (${result.score}/100)`
+    );
+
+    if (result.comparison) {
+        const sign = result.comparison.score_delta > 0 ? '+' : '';
+
+        appendText(
+            details,
+            ` (${sign}${result.comparison.score_delta} since last scan)`
+        );
+    }
+
+    appendText(details, ' ');
+    addLocalLink(details, result.download_url, 'PDF');
+
+    appendText(details, ' ');
+    addLocalLink(details, result.email_draft_url, 'Email');
+
+    row.appendChild(details);
+
+    return row;
+}
+
+async function pollBatch(batchId, total) {
+    try {
+        const response = await fetch(
+            `/batch/status/${encodeURIComponent(batchId)}`
+        );
+
+        const job = await response.json();
+
+        if (!job.ok) {
+            throw new Error('Batch status unavailable.');
+        }
+
+        const percent = total
+            ? Math.round((job.done / total) * 100)
+            : 0;
+
+        progressBarInner.style.width = percent + '%';
+
+        progressLabel.textContent =
+            `${job.done} / ${total} sites processed`;
+
+        batchResults.replaceChildren(
+            ...job.results.map(renderBatchRow)
+        );
+
+        if (job.finished) {
+            batchBtn.disabled = false;
+            batchBtn.textContent = 'Start Batch Audit';
+            progressLabel.textContent += ' — done.';
+        } else {
+            setTimeout(() => pollBatch(batchId, total), 1500);
+        }
+
+    } catch (error) {
+        progressLabel.textContent = 'Unable to retrieve batch status.';
+        batchBtn.disabled = false;
+        batchBtn.textContent = 'Start Batch Audit';
+    }
+}
+
+batchForm.addEventListener('submit', async event => {
+    event.preventDefault();
+
+    const raw = document.getElementById('urls').value;
+
+    const urls = raw
+        .split(/\r?\n/)
+        .map(value => value.trim())
+        .filter(Boolean);
+
+    if (!urls.length) return;
+
+    const deeper = document.getElementById('batch-deeper').checked;
+
+    batchBtn.disabled = true;
+    batchBtn.innerHTML = '<span class="spinner"></span>Starting...';
+
+    batchProgress.style.display = 'block';
+    batchResults.replaceChildren();
+    progressBarInner.style.width = '0%';
+    progressLabel.textContent = '';
+
+    try {
+        const response = await fetch('/batch', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ urls, deeper })
+        });
+
+        const data = await response.json();
+
+        if (!data.ok) {
+            progressLabel.textContent =
+                data.error || 'Failed to start batch.';
+
+            batchBtn.disabled = false;
+            batchBtn.textContent = 'Start Batch Audit';
+            return;
+        }
+
+        batchBtn.textContent = 'Running...';
+        pollBatch(data.batch_id, data.total);
+
+    } catch (error) {
+        progressLabel.textContent = 'The batch request failed.';
+        batchBtn.disabled = false;
+        batchBtn.textContent = 'Start Batch Audit';
+    }
+});
+</script>
+</body>
+</html>
