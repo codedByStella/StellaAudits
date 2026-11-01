@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+    @page { size: letter; margin: 2cm; }
+
+    body {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 10pt;
+        color: #222;
+    }
+
+    /* ---------- Cover page ---------- */
+    .cover {
+        page-break-after: always;
+        padding-top: 60px;
+        text-align: center;
+    }
+
+    .cover h1 {
+        font-size: 28pt;
+        color: #1a1a2e;
+        margin: 24px 0 8px 0;
+    }
+
+    .cover-url { font-size: 13pt; color: #333; margin-bottom: 6px; }
+    .cover-date { font-size: 10pt; color: #888; }
+
+    .grade-box {
+        display: inline-block;
+        margin-top: 36px;
+        padding: 18px 44px;
+        border: 3px solid #1a1a2e;
+        border-radius: 10px;
+    }
+
+    .grade-letter {
+        font-size: 46pt;
+        font-weight: bold;
+        color: #1a1a2e;
+        line-height: 1;
+    }
+
+    .grade-numeric { font-size: 12pt; color: #555; margin-top: 4px; }
+    .grade-label {
+        font-size: 9pt;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .cover-footer { margin-top: 40px; font-size: 9pt; color: #999; }
+
+    .comparison-box {
+        display: inline-block;
+        margin-top: 16px;
+        padding: 8px 20px;
+        background-color: #eef1ff;
+        border: 1px solid #ccd2f7;
+        border-radius: 8px;
+        font-size: 10pt;
+        color: #333;
+    }
+
+    .comparison-box .delta-up { color: #1a7a1a; font-weight: bold; }
+    .comparison-box .delta-down { color: #b00020; font-weight: bold; }
+    .comparison-box .delta-flat { color: #666; font-weight: bold; }
+
+    /* ---------- Executive summary ---------- */
+    .exec-summary { page-break-after: always; }
+
+    h1.section-title {
+        font-size: 18pt;
+        color: #1a1a2e;
+    }
+
+    .summary-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 16px 0 20px 0;
+    }
+
+    .summary-table td {
+        text-align: center;
+        padding: 12px;
+        border: 1px solid #ddd;
+    }
+
+    .sev-High { color: #b00020; font-weight: bold; font-size: 16pt; }
+    .sev-Medium { color: #b06000; font-weight: bold; font-size: 16pt; }
+    .sev-Low { color: #706000; font-weight: bold; font-size: 16pt; }
+    .sev-Info { color: #2a5db0; font-weight: bold; font-size: 16pt; }
+
+    .exec-intro { font-size: 10.5pt; line-height: 1.5; }
+    .category-tally { margin-top: 18px; }
+    .category-tally-row { padding: 8px 0; border-bottom: 1px solid #eee; }
+
+    /* ---------- Findings ---------- */
+    .meta-box {
+        background-color: #f4f4f8;
+        padding: 10px 14px;
+        margin-top: 4px;
+        margin-bottom: 20px;
+        border: 1px solid #ddd;
+    }
+
+    .category-header {
+        background-color: #1a1a2e;
+        color: #fff;
+        padding: 8px 12px;
+        font-size: 13pt;
+        margin-top: 24px;
+    }
+
+    .finding {
+        border: 1px solid #ddd;
+        border-left: 4px solid #999;
+        padding: 10px 14px;
+        margin-top: 10px;
+    }
+
+    .finding.High { border-left-color: #b00020; }
+    .finding.Medium { border-left-color: #b06000; }
+    .finding.Low { border-left-color: #a89000; }
+    .finding.Info { border-left-color: #2a5db0; }
+
+    .finding-title { font-size: 11pt; font-weight: bold; margin-bottom: 4px; }
+
+    .finding-severity {
+        font-size: 8pt;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 2px;
+        color: #fff;
+    }
+
+    .badge-High { background-color: #b00020; }
+    .badge-Medium { background-color: #b06000; }
+    .badge-Low { background-color: #a89000; }
+    .badge-Info { background-color: #2a5db0; }
+
+    .finding-section-label { font-weight: bold; font-size: 9pt; margin-top: 6px; }
+    .finding-text { font-size: 9.5pt; margin: 2px 0 6px 0; }
+
+    .evidence {
+        font-family: Courier, monospace;
+        font-size: 8.5pt;
+        background-color: #f4f4f4;
+        padding: 4px 6px;
+        margin-top: 4px;
+    }
+
+    .no-findings { color: #2a5db0; font-style: italic; padding: 10px 0; }
+
+    /* ---------- Closing page ---------- */
+    .closing-page { page-break-before: always; padding-top: 60px; }
+    .closing-page h1 { font-size: 20pt; color: #1a1a2e; }
+    .closing-body { font-size: 11pt; line-height: 1.6; margin-top: 14px; }
+
+    .disclaimer {
+        margin-top: 30px;
+        padding: 12px;
+        border: 1px solid #ccc;
+        background-color: #fafafa;
+        font-size: 8pt;
+        color: #555;
+    }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER PAGE ============ -->
+<div class="cover">
+    <h1>Website Audit Report</h1>
+    <div class="cover-url">{{ url }}</div>
+    <div class="cover-date">{{ generated_at }}</div>
+
+    <div class="grade-box">
+        <div class="grade-letter">{{ grade }}</div>
+        <div class="grade-numeric">{{ score }} / 100</div>
+        <div class="grade-label">Site Health Score</div>
+    </div>
+
+    {% if comparison %}
+    <div class="comparison-box">
+        Previous scan: {{ comparison.previous_date }} &mdash; {{ comparison.previous_grade }}
+        ({{ comparison.previous_score }}/100)
+        &nbsp;&rarr;&nbsp; Now: {{ grade }} ({{ score }}/100)
+        &nbsp;
+
+        {% if comparison.score_delta > 0 %}
+            <span class="delta-up">+{{ comparison.score_delta }}</span>
+        {% elif comparison.score_delta < 0 %}
+            <span class="delta-down">{{ comparison.score_delta }}</span>
+        {% else %}
+            <span class="delta-flat">no change</span>
+        {% endif %}
+
+        <br>
+        {{ comparison.resolved|length }} issue{{ "s" if comparison.resolved|length != 1 else "" }} resolved,
+        {{ comparison.new|length }} new since last scan
+    </div>
+    {% endif %}
+
+    <div class="cover-footer">Automated Website Audit</div>
+</div>
+
+<!-- ============ EXECUTIVE SUMMARY ============ -->
+<div class="exec-summary">
+    <h1 class="section-title">Executive Summary</h1>
+
+    <p class="exec-intro">
+        This report summarizes the results of an automated assessment of
+        <b>{{ url }}</b>. The assessment produced
+        <b>{{ score }} / 100 ({{ grade }})</b> and identified
+        {{ total_findings }} findings across the configured audit categories.
+    </p>
+
+    <table class="summary-table">
+        <tr>
+            <td><div class="sev-High">{{ counts.High }}</div>High Priority</td>
+            <td><div class="sev-Medium">{{ counts.Medium }}</div>Medium Priority</td>
+            <td><div class="sev-Low">{{ counts.Low }}</div>Low Priority</td>
+            <td><div class="sev-Info">{{ counts.Info }}</div>Informational</td>
+        </tr>
+    </table>
+
+    <div class="category-tally">
+        {% for category, findings in sections %}
+        <div class="category-tally-row">
+            <b>{{ category }}</b> &mdash;
+            {{ findings|length }} finding{{ "s" if findings|length != 1 else "" }}
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="meta-box" style="margin-top:24px;">
+        This report is an automated preliminary assessment.
+        It is not a certified accessibility audit, a penetration test,
+        or legal advice. Findings should be independently verified
+        before being relied upon for compliance or contractual decisions.
+    </div>
+</div>
+
+<!-- ============ DETAILED FINDINGS ============ -->
+<h1 class="section-title">Detailed Findings</h1>
+
+{% for category, findings in sections %}
+<div class="category-header">{{ category }}</div>
+
+{% if findings %}
+    {% for f in findings %}
+    <div class="finding {{ f.severity }}">
+        <div class="finding-title">
+            {{ f.title }}
+            <span class="finding-severity badge-{{ f.severity }}">{{ f.severity }}</span>
+        </div>
+
+        <div class="finding-text">{{ f.description }}</div>
+
+        <div class="finding-section-label">Why it matters:</div>
+        <div class="finding-text">{{ f.why_it_matters }}</div>
+
+        <div class="finding-section-label">Recommended fix:</div>
+        <div class="finding-text">{{ f.recommendation }}</div>
+
+        {% if f.reference %}
+        <div class="finding-text">
+            <i>Reference: {{ f.reference }}</i>
+        </div>
+        {% endif %}
+
+        {% if f.evidence %}
+        <div class="evidence">{{ f.evidence }}</div>
+        {% endif %}
+    </div>
+    {% endfor %}
+{% else %}
+    <div class="no-findings">No issues detected in this category.</div>
+{% endif %}
+{% endfor %}
+
+<div class="disclaimer">
+    <b>Methodology and limitations:</b>
+    This report was generated through automated analysis of publicly
+    accessible website content and applicable discovery resources.
+    Automated assessments may produce false positives or false negatives.
+    Results should be independently reviewed before being used as the
+    basis for legal, compliance, or contractual decisions.
+</div>
+
+<!-- ============ CLOSING PAGE ============ -->
+<div class="closing-page">
+    <h1>Interpretation and Limitations</h1>
+
+    <div class="closing-body">
+        The findings in this report represent the output of an automated
+        assessment at the recorded time.
+
+        <br><br>
+
+        Results may vary as website content, configuration, and external
+        resources change. A finding's presence or absence does not
+        independently establish compliance, security, or overall quality.
+
+        <br><br>
+
+        Further review may be appropriate to validate individual findings,
+        determine their relevance, and assess potential remediation.
+    </div>
+</div>
+
+</body>
+</html>
