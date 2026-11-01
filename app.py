@@ -107,7 +107,6 @@ def _run_and_persist(url: str, include_deeper: bool) -> dict:
         "grade": result.grade,
         "download_url": f"/reports/{pdf_filename}",
         "email_draft_url": f"/reports/{email_filename}",
-        "email_compliant": draft["compliant"],
         "email_warnings": draft["warnings"],
     }
 
